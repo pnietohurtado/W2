@@ -2,7 +2,44 @@ import React from 'react';
 import { Mail, Lock, LogIn, Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+
+interface login {
+    user: string;
+    pass: string;
+}
+
 const Login: React.FC = () => {
+
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const hashedPassword = await encriptationHash(password);
+        console.log('Email:', email, 'HashedPassword:', hashedPassword);
+
+        const response = await fetch('http://localhost:9085/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user: email, pass: hashedPassword })
+        });
+
+        const data = await response.json();
+        console.log(data);
+    };
+
+    const encriptationHash = async (value: string) => {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(value);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#0d0d12] bg-gradient-to-br from-[#1a0b2e] via-[#0d0d12] to-[#0a0a0f] p-4 font-sans text-white">
             {/* Background decoration */}
@@ -21,7 +58,7 @@ const Login: React.FC = () => {
                     <p className="text-gray-400">Inicia sesión en tu cuenta</p>
                 </div>
 
-                <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-5" onSubmit={handleSubmit}>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-300 ml-1">Email</label>
                         <div className="relative group">
@@ -29,6 +66,8 @@ const Login: React.FC = () => {
                             <input
                                 type="email"
                                 placeholder="tu@email.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all text-white placeholder:text-gray-600"
                             />
                         </div>
@@ -44,6 +83,8 @@ const Login: React.FC = () => {
                             <input
                                 type="password"
                                 placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all text-white placeholder:text-gray-600"
                             />
                         </div>
@@ -54,7 +95,7 @@ const Login: React.FC = () => {
                         <label htmlFor="remember" className="text-sm text-gray-400">Recordarme</label>
                     </div>
 
-                    <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-lg shadow-lg shadow-purple-900/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
+                    <button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-lg shadow-lg shadow-purple-900/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
                         Entrar
                     </button>
                 </form>
