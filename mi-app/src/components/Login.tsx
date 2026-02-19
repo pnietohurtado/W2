@@ -3,10 +3,6 @@ import { Mail, Lock, LogIn, Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 
-interface login {
-    user: string;
-    pass: string;
-}
 
 const Login: React.FC = () => {
 

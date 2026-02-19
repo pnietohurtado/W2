@@ -1,8 +1,41 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Mail, Lock, User, UserPlus, Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Register: React.FC = () => {
+
+
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [username, setUsername] = React.useState('');
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+            e.preventDefault();
+    
+            const hashedPassword = await encriptationHash(password);
+            console.log('Email:', email, 'HashedPassword:', hashedPassword, ' Username: ', username);
+    
+            const response = await fetch('http://localhost:9085/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, username: username, password: hashedPassword })
+            });
+    
+            const data = await response.json();
+            console.log(data);
+        };
+    
+        const encriptationHash = async (value: string) => {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(value);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        };
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#0d0d12] bg-gradient-to-br from-[#1a0b2e] via-[#0d0d12] to-[#0a0a0f] p-4 font-sans text-white">
             {/* Background decoration */}
@@ -21,7 +54,7 @@ const Register: React.FC = () => {
                     <p className="text-gray-400">Únete a nuestra comunidad hoy mismo</p>
                 </div>
 
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-300 ml-1">Nombre completo</label>
                         <div className="relative group">
@@ -29,6 +62,7 @@ const Register: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder="Juan Pérez"
+                                onChange={(e) => setUsername(e.target.value)}
                                 className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all text-white placeholder:text-gray-600"
                             />
                         </div>
@@ -41,6 +75,7 @@ const Register: React.FC = () => {
                             <input
                                 type="email"
                                 placeholder="tu@email.com"
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all text-white placeholder:text-gray-600"
                             />
                         </div>
@@ -53,6 +88,7 @@ const Register: React.FC = () => {
                             <input
                                 type="password"
                                 placeholder="••••••••"
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all text-white placeholder:text-gray-600"
                             />
                         </div>
